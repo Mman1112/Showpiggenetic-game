@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Showpig Genetics Game</title>
+  <style>
+    body { font-family: sans-serif; text-align:center; margin-top:40px; }
+    .bar { width:200px; height:20px; background:#eee; margin:10px auto; border-radius:4px; overflow:hidden; }
+    .fill { height:100%; background:#76c7c0; width:50%; }
+    button { padding:10px 20px; margin:5px; font-size:16px; }
+    #pedigree { text-align:left; display:inline-block; margin-top:20px; }
+    #traits { margin:20px 0; }
+  </style>
+</head>
+<body>
+  <h1>Showpig Genetics Game</h1>
+
+  <div id="traits">
+    <strong>Genetics Traits:</strong><br>
+    <span id="g-muscle"></span> • <span id="g-structure"></span> • <span id="g-growth"></span> • <span id="g-temp"></span>
+  </div>
+
+  <div id="stats">
+    <div>Health</div><div class="bar"><div id="health" class="fill"></div></div>
+    <div>Happiness</div><div class="bar"><div id="happiness" class="fill"></div></div>
+  </div>
+
+  <button id="feed">Feed 🥕</button>
+  <button id="play">Play 🎾</button>
+  <div id="message">Take care of your pig!</div>
+
+  <div id="pedigree">
+    <h3>Pedigree</h3>
+    <div><strong>Sire:</strong> <span id="sire-name"></span> (<span id="sire-traits"></span>)</div>
+    <div><strong>Dam:</strong> <span id="dam-name"></span> (<span id="dam-traits"></span>)</div>
+  </div>
+
+  <script>
+    // Helper
+    function randTrait() { return Math.floor(Math.random()*10)+1; }
+
+    // Parent genetics
+    const sire = { name: 'Big Red', muscle:9, structure:8, growth:7, temp:6 };
+    const dam  = { name: 'Pink Pearl', muscle:7, structure:9, growth:6, temp:8 };
+
+    // Piglet genetics (average + small random)
+    const pig = {
+      muscle: Math.round((sire.muscle + dam.muscle)/2 + (randTrait()-5)/2),
+      structure: Math.round((sire.structure + dam.structure)/2 + (randTrait()-5)/2),
+      growth: Math.round((sire.growth + dam.growth)/2 + (randTrait()-5)/2),
+      temp: Math.round((sire.temp + dam.temp)/2 + (randTrait()-5)/2)
+    };
+
+    // Display pedigree & traits
+    document.getElementById('sire-name').textContent = sire.name;
+    document.getElementById('sire-traits').textContent = 
+      `🦾${sire.muscle} ⚙️${sire.structure} 🚀${sire.growth} 😊${sire.temp}`;
+    document.getElementById('dam-name').textContent = dam.name;
+    document.getElementById('dam-traits').textContent = 
+      `🦾${dam.muscle} ⚙️${dam.structure} 🚀${dam.growth} 😊${dam.temp}`;
+    document.getElementById('g-muscle').textContent = `Muscle: ${pig.muscle}`;
+    document.getElementById('g-structure').textContent = `Structure: ${pig.structure}`;
+    document.getElementById('g-growth').textContent = `Growth: ${pig.growth}`;
+    document.getElementById('g-temp').textContent = `Temperament: ${pig.temp}`;
+
+    // Stats
+    let health = 50, happiness = 50;
+    const max = 100;
+    const healthBar = document.getElementById('health');
+    const happinessBar = document.getElementById('happiness');
+    const msg = document.getElementById('message');
+
+    function updateBars(){
+      healthBar.style.width = health + '%';
+      happinessBar.style.width = happiness + '%';
+    }
+
+    // Feed/play effects scale with genetics
+    document.getElementById('feed').onclick = () => {
+      const boost = 5 + pig.growth * 0.5;
+      health = Math.min(max, health + boost);
+      msg.textContent = `Yum! Health +${boost.toFixed(1)}.`;
+      updateBars(); checkShow();
+    };
+    document.getElementById('play').onclick = () => {
+      const boost = 5 + pig.temp * 0.5;
+      happiness = Math.min(max, happiness + boost);
+      msg.textContent = `Fun! Happiness +${boost.toFixed(1)}.`;
+      updateBars(); checkShow();
+    };
+
+    function checkShow(){
+      if (health >= max && happiness >= max) {
+        msg.textContent = `🌟 Show-ready! You're a genetics champ!`;
+      }
+    }
+
+    setInterval(() => {
+      const decayH = 1 + (10 - pig.muscle)*0.1;
+      const decayHp = 1 + (10 - pig.temp)*0.1;
+      health = Math.max(0, health - decayH);
+      happiness = Math.max(0, happiness - decayHp);
+      updateBars();
+      if(health === 0 || happiness === 0){
+        msg.textContent = '⏰ Attention! Needs care!';
+      }
+    }, 2000);
+
+    updateBars();
+  </script>
+</body>
+</html>
